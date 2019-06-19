@@ -17,5 +17,20 @@ module.exports = [
             "state": "string", 
             "country": "string"
         }
+    },
+    {
+        "method": 'patch',
+        "name": '/users',
+        "body": {
+            "user_name": "string",
+            "user_email": "string",
+            "contact": "string", 
+            "phoneCode": 'string',
+            "user_address": "string",
+            "password": 'string',
+            "city": "string",
+            "state": "string", 
+            "country": "string"
+        }
     }
 ];
