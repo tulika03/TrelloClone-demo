@@ -4,8 +4,11 @@ const morgan = require('morgan')
 const bodyParser = require('body-parser');
 const expressSwagger = require('express-swagger-generator')(app)
 const cors = require('cors')
+let rateLimit = require('express-rate-limit')
 
+// routes
 const userRoutes = require('./api/routes/users')
+const loginRoutes = require('./api/routes/login')
 
 let options = {
     swaggerDefinition: {
@@ -35,17 +38,36 @@ let options = {
 
 expressSwagger(options);
 
+morgan.token('id', function getId(req) {
+  return req.id
+})
+
+morgan.token('req', function(req) {
+  return JSON.stringify(req.body)
+})
+
+let loggerFormat = 'Logger -- :id [:date[web]] ":method :url" :status :response-time :req '
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 1000
+});
+
+app.use(apiLimiter);
 app.use(morgan('dev'))
+
+app.use(morgan(loggerFormat, {
+  skip: function(req, res) {
+    return res.statusCode >=400
+  },
+  stream: process.stderr
+}))
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
 app.use(cors())
 
-// var corsOptions = {
-//   origin: 'http://example.com',
-//   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
-// }
-
 //app.use() acts as a middleware
+app.use('/login', loginRoutes)
 app.use('/users', userRoutes);
 
 app.use((req, res, next) => {
