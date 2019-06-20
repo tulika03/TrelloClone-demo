@@ -56,9 +56,10 @@ DROP TABLE IF EXISTS `board_type_master`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
  SET character_set_client = utf8mb4 ;
 CREATE TABLE `board_type_master` (
-  `board_type_id` int(11) NOT NULL AUTO_INCREMENT,
+  `board_type_id` int(11) NOT NULL,
   `board_type_name` varchar(100) NOT NULL,
-  PRIMARY KEY (`board_type_id`)
+  PRIMARY KEY (`board_type_id`),
+  UNIQUE KEY `board_type_id_UNIQUE` (`board_type_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -68,6 +69,7 @@ CREATE TABLE `board_type_master` (
 
 LOCK TABLES `board_type_master` WRITE;
 /*!40000 ALTER TABLE `board_type_master` DISABLE KEYS */;
+INSERT INTO `board_type_master` VALUES (1,'Personal'),(2,'Team');
 /*!40000 ALTER TABLE `board_type_master` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -370,15 +372,16 @@ CREATE TABLE `user_master` (
   `user_name` varchar(50) NOT NULL,
   `user_email` varchar(100) NOT NULL,
   `username` varchar(100) DEFAULT NULL,
-  `password` varchar(500) NOT NULL,
+  `password` varchar(500) DEFAULT NULL,
   `contact` varchar(10) NOT NULL,
   `phoneCode` varchar(5) NOT NULL,
   `user_address` varchar(300) NOT NULL,
   `city` varchar(100) NOT NULL,
   `state` varchar(100) NOT NULL,
   `country` varchar(100) NOT NULL,
-  PRIMARY KEY (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `user_email_UNIQUE` (`user_email`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -387,7 +390,7 @@ CREATE TABLE `user_master` (
 
 LOCK TABLES `user_master` WRITE;
 /*!40000 ALTER TABLE `user_master` DISABLE KEYS */;
-INSERT INTO `user_master` VALUES (1,'user1','user1@gmail.com',NULL,'12345','9878765456','+91','delhi','New Delhi','Delhi','India'),(2,'user1','user1@gmail.com',NULL,'12345','9878765456','+91','delhi','New Delhi','Delhi','India');
+INSERT INTO `user_master` VALUES (3,'Anita','anita@gmail.com',NULL,'$2b$10$E2FkL6m/OT5jjFJhW5zOg.Ngov2vde4xAc2YlIpHZQbKuCfqs6F4G','9654567543','+91','okhla','New Delhi','Delhi','India'),(4,'Sunita','sunita@gmail.com',NULL,'$2b$10$dT3uKywAHi5/wPEeTJRSkODu.GH33qMQ6wUp52efjYv/2IJfvhHty','9654557543','+91','okhla','New Delhi','Delhi','India');
 /*!40000 ALTER TABLE `user_master` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -408,4 +411,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-06-19 16:58:30
+-- Dump completed on 2019-06-20 16:26:28
