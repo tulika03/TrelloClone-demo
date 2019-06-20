@@ -7,12 +7,11 @@ let jwt = require('jsonwebtoken')
 require('../../env')
 
 router.use(function(req, res, next) {
+    console.log("request headers", req.headers)
     // check header or url parameters or post parameters for token
-    let token = req.headers['x-acces-token']
+    let token = req.headers['x-access-token']
     console.log("token is: ", token)
-
     // decode token
-
     if(token) {
         jwt.verify(token, process.env.JWT_KEY, function(err, decoded) {
             if(err) {

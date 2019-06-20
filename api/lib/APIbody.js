@@ -27,7 +27,6 @@ module.exports = [
             "contact": "string", 
             "phoneCode": 'string',
             "user_address": "string",
-            "password": 'string',
             "city": "string",
             "state": "string", 
             "country": "string"

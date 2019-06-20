@@ -35,13 +35,13 @@ router.post('/', (req, res, next) => {
                 console.log("Connection could not be establed with the database.")
             }
             else {
-                tempConnection.query('select user_id, user_email, password from user_master where user_email = ?', [req.body.user_email], (err, rows, field) => {
+                tempConnection.query('select user_id, user_email, password from user_master where user_email = ?', 
+                [req.body.user_email], (err, rows, field) => {
                     tempConnection.release()
                     if (err) {
-                        res.status(400).json({
-                            error: 1,
-                            message: "Invalid credentials"
-                        })
+                        console.log('Error : ', err);
+						let response = {error: 1, message: 'Unable to process. Try again'};
+						res.status(504).json(response);
                     }
 
                     else {
@@ -61,13 +61,13 @@ router.post('/', (req, res, next) => {
                                     },
                                     process.env.JWT_KEY,
                                     {
-                                        expiresIn: 20000
+                                        expiresIn: 200000
                                     }
                                 )
 
                                 return res.status(200).json({
                                     message: 'User logged in successfully.....',
-                                    token: 'Bearer '+ userLoginToken
+                                    token: userLoginToken
                                 })
                             }
 
@@ -78,5 +78,9 @@ router.post('/', (req, res, next) => {
         })
     }
 })
+
+
+
+
 
 module.exports = router

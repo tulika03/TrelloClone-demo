@@ -9,6 +9,7 @@ let rateLimit = require('express-rate-limit')
 // routes
 const userRoutes = require('./api/routes/users')
 const loginRoutes = require('./api/routes/login')
+const boardTypeRoute = require('./api/routes/boardType')
 
 let options = {
     swaggerDefinition: {
@@ -27,10 +28,14 @@ let options = {
             JWT: {
                 type: 'apiKey',
                 in: 'header',
-                name: 'Authorization',
-                description: "",
+                name: 'x-access-token'
             }
         },
+        security: [
+          {
+            JWT: []
+          }
+        ]
     },
     basedir: __dirname, //app absolute path
     files: ['./api/routes/**/*.js'] //Path to the API handle folder
@@ -69,6 +74,7 @@ app.use(cors())
 //app.use() acts as a middleware
 app.use('/login', loginRoutes)
 app.use('/users', userRoutes);
+app.use('/board-type', boardTypeRoute)
 
 app.use((req, res, next) => {
     console.log("check 404")

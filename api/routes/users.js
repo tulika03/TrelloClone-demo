@@ -28,7 +28,6 @@ const bcrypt = require('bcrypt')
  * @route POST /users
  * @param {User.model} User.body.required
  * @group Users  
-
  */
 
 //post user details
@@ -88,7 +87,7 @@ router.post('/', (req, res, next) => {
 * @security JWT
 */
 // get details of all the users
-router.get('/',checkAuth, (req, res, next) => {
+router.get('/', checkAuth, (req, res, next) => {
     connection.getConnection((err, tempConnection) => {
         if (err) {
             console.log("error in connection")
@@ -98,6 +97,7 @@ router.get('/',checkAuth, (req, res, next) => {
                 if (err) throw err;
                 else {
                     console.log("data is", result);
+                    console.log("decoded check", req.decoded)
                     res.status(200).json({
                         message: "data fetched successfully....",
                         data: result[0]
@@ -133,7 +133,7 @@ router.get('/:userId', checkAuth, (req, res, next) => {
                     console.log("data is", result);
                     res.status(200).json({
                         message: "data fetched successfully....",
-                        data: result[0]
+                        data: result
                     })
                 }
             })
@@ -180,8 +180,8 @@ router.put('/:userId', checkAuth, (req, res, next) => {
                 console.log("connection could not be established.....")
             }
             else {
-                tempCon.query('UPDATE user_master set user_name = ?, user_email = ?, password = ?, contact = ?, phoneCode = ?, user_address = ?, city = ?, state = ?, country = ?',
-                    [req.body.user_name, req.body.user_email, req.body.password, req.body.contact, req.body.phoneCode, req.body.user_address, req.body.city, req.body.state, req.body.country],
+                tempCon.query('UPDATE user_master set user_name = ?, user_email = ?, contact = ?, phoneCode = ?, user_address = ?, city = ?, state = ?, country = ?',
+                    [req.body.user_name, req.body.user_email, req.body.contact, req.body.phoneCode, req.body.user_address, req.body.city, req.body.state, req.body.country],
                     function (err, result) {
                         if (err) throw err;
                         else {
