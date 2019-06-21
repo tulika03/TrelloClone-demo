@@ -64,6 +64,7 @@ router.get('/', (req, res, next) => {
         }
         else {
             tempConn.query("Select * from board_type_master", (err, result) => {
+                tempConn.release()
                 if(err) throw err;
                 else {
                     console.log(result)

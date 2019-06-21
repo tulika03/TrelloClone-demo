@@ -15,7 +15,7 @@ let options = {
     swaggerDefinition: {
         info: {
             description: 'This is a sample server',
-            title: 'trllo Clone',
+            title: 'Trello Clone backend',
             version: '1.0.0',
         },
         host: 'localhost:3001',
@@ -72,7 +72,7 @@ app.use(bodyParser.json())
 app.use(cors())
 
 //app.use() acts as a middleware
-app.use('/login', loginRoutes)
+app.use('/auth', loginRoutes)
 app.use('/users', userRoutes);
 app.use('/board-type', boardTypeRoute)
 

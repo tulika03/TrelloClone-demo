@@ -22,7 +22,8 @@ let config = function () {
             database: 'trelloDB',
             connectionLimit: 100            
         },
-        timeout :20000
+        timeout :20000,
+        baseUrl: 'empty'
     }
 }
 
