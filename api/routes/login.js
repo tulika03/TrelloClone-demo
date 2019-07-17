@@ -40,7 +40,7 @@ router.post('/login', (req, res) => {
             }
             else {
                 tempConnection.query('select user_id, user_email, password from user_master where user_email = ?',
-                    [req.body.user_email], (err, rows, field) => {
+                    [req.body.user_email, ], (err, rows, field) => {
                         tempConnection.release()
                         if (err) {
                             console.log('Error : ', err);
@@ -49,34 +49,48 @@ router.post('/login', (req, res) => {
                         }
 
                         else {
-                            console.log(req.body.password, "req body password..." + rows[0].password)
-                            bcrypt.compare(req.body.password, rows[0].password, (err, result) => {
-                                if (err) {
-                                    console.log("bcrypt eror block")
-                                    return res.status(401).json({
-                                        message: "Authentication failed"
-                                    })
-                                }
-                                else if (result) {
-                                    const userLoginToken = jwt.sign(
-                                        token = {
-                                            user_id: rows[0].user_id,
-                                            user_name: rows[0].user_name,
-                                            user_email: rows[0].user_email
-                                        },
-                                        process.env.JWT_KEY,
-                                        {
-                                            expiresIn: 200000
-                                        }
-                                    )
-
-                                    return res.status(200).json({
-                                        message: 'User logged in successfully.....',
-                                        token: userLoginToken
-                                    })
-                                }
-
-                            })
+                            console.log("rows.length", rows.length)
+                            if(rows.length == 1) {
+                                bcrypt.compare(req.body.password, rows[0].password, (err, result) => {
+                                    if (err) {
+                                        console.log("bcrypt eror block")
+                                        return res.status(401).json({
+                                            message: "Unable to process. Please try again..."
+                                        })
+                                    }
+                                    else if (result) {
+                                        const userLoginToken = jwt.sign(
+                                            token = {
+                                                user_id: rows[0].user_id,
+                                                user_name: rows[0].user_name,
+                                                user_email: rows[0].user_email
+                                            },
+                                            process.env.JWT_KEY,
+                                            {
+                                                expiresIn: 200000
+                                            }
+                                        )
+    
+                                        return res.status(200).json({
+                                            message: 'User logged in successfully.....',
+                                            token: userLoginToken
+                                        })
+                                    }
+                                    else if(!result){
+                                        console.log("bcrypt else block")
+                                        return res.status(401).json({
+                                            message: "Authentication failed"
+                                        })
+                                    }
+    
+                                })
+                            } 
+                            else {
+                                return res.status(401).json({
+                                    message: 'You are unauthorized to login....'
+                                })
+                            }
+                   
                         }
                     })
             }
@@ -124,7 +138,7 @@ router.post('/forgotPassword', (req, res, next) => {
                             let link = `${config.baseUrl}\\auth\\reset_password\\${req.body.user_email}\\${verification_key}`;
                             sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                             const msg = {
-                                to: 'test1@gmail.com',
+                                to: req.body.user_email,
                                 from: 'test2@gmail.com',
                                 subject: 'Reset password Trello',
                                 text: 'Please reset your password by clicking on the given link ' + link
@@ -176,20 +190,27 @@ router.put('/resetPassword', (req, res, next) => {
                         })
                     }
                     else {
-                        tempConn.query('UPDATE user_master set password = ? where user_email = ? and verification_key = ?', 
-                        [hash, req.body.user_email, req.body.verification_key], (err, rows, field) => {
-                            tempConn.release()
-                            if (err) {
-                                let response = {error: 1, message: 'Unable to process. Try again'};
+                        tempConn.query('UPDATE `user_master` SET `password` = ? WHERE `user_email` = ? AND `verification_key` = ?', 
+                        [hash, req.body.user_email, req.body.verification_key], (error, rows, field) => {
+                            tempConn.release();
+                            if (error) {
+                                console.log('Error : ',error);
+                                let response = {error: 1, message: 'Unable to process. Please try again'};
 						        res.status(504).json(response);
                             }
                             else {
-                                console.log('Error : ',err);
-                                console.log("password changed successfully..")
-                                res.status(200).json({
-                                    message: 'Password updated successfully.',
-                                    data: rows[0]
-                                })
+                                if(rows.affectedRows != 0) {
+                                    console.log("password changed successfully..")
+                                    res.status(200).json({
+                                        message: 'Password updated successfully.'
+                                    })
+                                }
+                                else {
+                                    console.log('Authorization code invalid');
+							        let response = {error: 1, message: 'Authorization code invalid'};
+							        res.status(401).json(response);
+                                }
+                               
                             }
                         })
                     }

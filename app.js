@@ -10,6 +10,7 @@ let rateLimit = require('express-rate-limit')
 const userRoutes = require('./api/routes/users')
 const loginRoutes = require('./api/routes/login')
 const boardTypeRoute = require('./api/routes/boardType')
+const boardRoutes = require('./api/routes/boardMaster')
 
 let options = {
     swaggerDefinition: {
@@ -75,6 +76,7 @@ app.use(cors())
 app.use('/auth', loginRoutes)
 app.use('/users', userRoutes);
 app.use('/board-type', boardTypeRoute)
+app.use('/board', boardRoutes)
 
 app.use((req, res, next) => {
     console.log("check 404")

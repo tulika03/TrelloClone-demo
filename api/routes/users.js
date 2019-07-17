@@ -32,7 +32,6 @@ const bcrypt = require('bcrypt')
 
 //post user details
 router.post('/', (req, res, next) => {
-    console.log("sdusaydutytds", req.body)
     let body = APIBody.find(e => e.method == 'post' && e.name == '/users');
     if (!(bodyCheck.checkBody(req.body, body.body)).success) {
         console.log("parameter not found....")
@@ -60,7 +59,6 @@ router.post('/', (req, res, next) => {
                             let city = req.body.city
                             let state = req.body.state
                             let country = req.body.country
-                            console.log("email is", email)
                             tempConnection.query('INSERT into user_master(user_name, user_email, password, contact, phoneCode, user_address, city, state, country)VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)'
                                 , [name, email, password, contact, phoneCode, address, city, state, country], function (err, result) {
                                     if (err) throw err;

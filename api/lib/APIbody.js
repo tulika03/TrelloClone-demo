@@ -31,5 +31,14 @@ module.exports = [
             "state": "string", 
             "country": "string"
         }
+    },
+    {
+        "method": 'post',
+        "name": '/teams/addTeam',
+        "body": {
+            "team_name": "string",
+            "team_desc": "string",
+            "team_mode": "string"
+        }
     }
 ];
