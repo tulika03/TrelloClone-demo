@@ -11,6 +11,7 @@ const userRoutes = require('./api/routes/users')
 const loginRoutes = require('./api/routes/login')
 const boardTypeRoute = require('./api/routes/boardType')
 const boardRoutes = require('./api/routes/boardMaster')
+const imageOptionsRoutes = require('./api/routes/imagesOptions')
 
 let options = {
     swaggerDefinition: {
@@ -73,10 +74,13 @@ app.use(bodyParser.json())
 app.use(cors())
 
 //app.use() acts as a middleware
+
+app.use('/uploads', express.static('uploads'));
 app.use('/auth', loginRoutes)
 app.use('/users', userRoutes);
 app.use('/board-type', boardTypeRoute)
 app.use('/board', boardRoutes)
+app.use('/images', imageOptionsRoutes)
 
 app.use((req, res, next) => {
     console.log("check 404")

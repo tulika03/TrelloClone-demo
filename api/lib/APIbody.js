@@ -40,5 +40,14 @@ module.exports = [
             "team_desc": "string",
             "team_mode": "string"
         }
+    },
+    {
+        "method": 'post',
+        "name": '/addBoard',
+        "body": {
+            "board_title": "string",
+             "board_desc" : "string",
+             "board_type_id": "integer"
+        }
     }
 ];
