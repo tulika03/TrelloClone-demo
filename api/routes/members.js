@@ -5,36 +5,30 @@ let config = require('../../database/dbConnection')
 let connection = mysql.createPool(config.database)
 
 let checkAuth = require('../middleware/checkAuth')
-//const connection = require('../../database/dbConnection');
 const APIBody = require("../lib/APIbody")
 const bodyCheck = require("../lib/bodyCheck")
 const bcrypt = require('bcrypt')
 
 
 /**
- * @typedef User
- * @property {string} user_name.required
- * @property {string} user_email.required
+ * @typedef Member
+ * @property {string} member_fullname.required
+ * @property {string} member_email.required
  * @property {string} contact.required
  * @property {string} phoneCode.required
- * @property {string} user_address.required
  * @property {string} password.required
- * @property {string} city.required
- * @property {string} state.required
- * @property {string} country.required
  */
 
 /**
- * @route POST /users
- * @param {User.model} User.body.required
- * @group Users  
+ * @route POST /members/add
+ * @param {Member.model} Member.body.required
+ * @group Members  
  */
 
-//post user details
-router.post('/', (req, res, next) => {
-    let body = APIBody.find(e => e.method == 'post' && e.name == '/users');
+//post member details
+router.post('/add', (req, res, next) => {
+    let body = APIBody.find(e => e.method == 'post' && e.name == '/add');
     if (!(bodyCheck.checkBody(req.body, body.body)).success) {
-        console.log("parameter not found....")
         res.status(400).json({ error: 1, message: 'Required parameter is missing....' })
     }
     else {
@@ -50,17 +44,13 @@ router.post('/', (req, res, next) => {
                             console.log(error, "error in connection..")
                         }
                         else {
-                            let name = req.body.user_name
-                            let email = req.body.user_email
+                            let name = req.body.member_fullname
+                            let email = req.body.member_email
                             let contact = req.body.contact
                             let phoneCode = req.body.phoneCode
                             let password = hash
-                            let address = req.body.user_address
-                            let city = req.body.city
-                            let state = req.body.state
-                            let country = req.body.country
-                            tempConnection.query('INSERT into user_master(user_name, user_email, password, contact, phoneCode, user_address, city, state, country)VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)'
-                                , [name, email, password, contact, phoneCode, address, city, state, country], function (err, result) {
+                            tempConnection.query('INSERT into member_master(member_fullname, member_email, password, contact, phoneCode, confirmed, member_type, addedOn)VALUES(?, ?, ?, ?, ?, 1, "normal", UNIX_TIMESTAMP())'
+                                , [name, email, password, contact, phoneCode], function (err, result) {
                                     if (err) throw err;
                                     else {
                                         console.log("Data inserted successfully...")
@@ -80,22 +70,21 @@ router.post('/', (req, res, next) => {
 })
 
 /**
-* @route get /users
-* @group Users
+* @route get /members
+* @group Members
 * @security JWT
 */
-// get details of all the users
+
+// get details of all the members
 router.get('/', checkAuth, (req, res, next) => {
     connection.getConnection((err, tempConnection) => {
         if (err) {
             console.log("error in connection")
         }
         else {
-            tempConnection.query('Select * from user_master', function (err, result) {
+            tempConnection.query('Select * from member_master', function (err, result) {
                 if (err) throw err;
                 else {
-                    console.log("data is", result);
-                    console.log("decoded check", req.decoded)
                     res.status(200).json({
                         message: "data fetched successfully....",
                         data: result[0]
@@ -110,22 +99,22 @@ router.get('/', checkAuth, (req, res, next) => {
 
 });
 
-// get user details on user id
-//swagger api description
+// get member details on member id
+
 /**
-* @route get /users/{userId}
-* @param {number} userId.path.required
+* @route get /members/{memberId}
+* @param {number} memberId.path.required
 * @security JWT
-* @group Users
+* @group Members
 */
-router.get('/:userId', checkAuth, (req, res, next) => {
-    let userId = req.params.userId
+router.get('/:memberId', checkAuth, (req, res, next) => {
+    let memberId = req.params.memberId
     connection.getConnection((err, tempConnection) => {
         if (err) {
             console.log("error in connection")
         }
         else {
-            tempConnection.query('Select * from user_master where user_id = ?', [userId], function (err, result, field) {
+            tempConnection.query('Select * from member_master where member_id = ?', [memberId], function (err, result, field) {
                 if (err) throw err;
                 else {
                     console.log("data is", result);
@@ -143,32 +132,26 @@ router.get('/:userId', checkAuth, (req, res, next) => {
 });
 
 
-//update user details
+//update member details
 
 /**
-* @typedef User
-* @property {string} user_name.required
-* @property {string} user_email.required
+* @typedef MemberEdit
+* @property {string} member_fullname.required
+* @property {string} member_email.required
 * @property {string} contact.required
 * @property {string} phoneCode.required
-* @property {string} user_address.required
-* @property {string} password.required
-* @property {string} city.required
-* @property {string} state.required
-* @property {string} country.required
 */
 
 /**
- * @route PUT /users/{userId}
- * @param {User.model} User.body.required
- * @param {number} userId.path.required
- * @group Users  
+ * @route PUT /members/edit/{memberId}
+ * @param {MemberEdit.model} MemberEdit.body.required
+ * @param {number} memberId.path.required
+ * @group Members  
  */
 
-router.put('/:userId', checkAuth, (req, res, next) => {
-    console.log("jshdatdyrsa tdsaedre")
-    let userId = req.params.userId
-    let body = APIBody.find(e => e.method == 'patch' && e.name == '/users')
+router.put('/edit/:memberId', checkAuth, (req, res, next) => {
+    let memberId = req.params.memberId
+    let body = APIBody.find(e => e.method == 'patch' && e.name == '/members/edit')
     if (!(bodyCheck.checkBody(req.body, body.body)).success) {
         console.log("parameter is missing....")
     }
@@ -178,8 +161,8 @@ router.put('/:userId', checkAuth, (req, res, next) => {
                 console.log("connection could not be established.....")
             }
             else {
-                tempCon.query('UPDATE user_master set user_name = ?, user_email = ?, contact = ?, phoneCode = ?, user_address = ?, city = ?, state = ?, country = ?',
-                    [req.body.user_name, req.body.user_email, req.body.contact, req.body.phoneCode, req.body.user_address, req.body.city, req.body.state, req.body.country],
+                tempCon.query('UPDATE member_master set member_fullname = ?, member_email = ?, contact = ?, phoneCode = ? where member_id = ?',
+                    [req.body.member_fullname, req.body.member_email, req.body.contact, req.body.phoneCode, req.params.memberId],
                     function (err, result) {
                         if (err) throw err;
                         else {

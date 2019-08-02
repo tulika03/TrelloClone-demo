@@ -14,20 +14,20 @@ let rn = require('random-number')
 
 /**
  * @typedef Login
- * @property {string} user_email.required
+ * @property {string} member_email.required
  * @property {string} password.required
  */
 
 /**
  * @route post /auth/login
- * @group Users
+ * @group Members
  * @param {Login.model} login.body.required
  */
 
 //login 
 
 router.post('/login', (req, res) => {
-    if (typeof req.body.user_email == 'undefined' || req.body.user_email == null || req.body.password == null || typeof req.body.password == 'undefined') {
+    if (typeof req.body.member_email == 'undefined' || req.body.member_email == null || req.body.password == null || typeof req.body.password == 'undefined') {
         console.log("Username parameter not found")
         res.status(400).json({
             message: 'Username or password is missing.....'
@@ -39,8 +39,8 @@ router.post('/login', (req, res) => {
                 console.log("Connection could not be establed with the database.")
             }
             else {
-                tempConnection.query('select user_id, user_email, password from user_master where user_email = ?',
-                    [req.body.user_email, ], (err, rows, field) => {
+                tempConnection.query('select member_id, member_email, password from member_master where member_email = ?',
+                    [req.body.member_email, ], (err, rows, field) => {
                         tempConnection.release()
                         if (err) {
                             console.log('Error : ', err);
@@ -61,9 +61,9 @@ router.post('/login', (req, res) => {
                                     else if (result) {
                                         const userLoginToken = jwt.sign(
                                             token = {
-                                                user_id: rows[0].user_id,
-                                                user_name: rows[0].user_name,
-                                                user_email: rows[0].user_email
+                                                member_id: rows[0].member_id,
+                                                member_fullname: rows[0].member_fullname,
+                                                member_email: rows[0].member_email
                                             },
                                             process.env.JWT_KEY,
                                             {
@@ -101,19 +101,19 @@ router.post('/login', (req, res) => {
 
 /**
  * @typedef forgotPassword
- * @property {string} user_email.required
+ * @property {string} member_email.required
  */
 
 /**
  * @route post /auth/forgotPassword
- * @group Users
+ * @group Members
  * @param {forgotPassword.model} forgotPassword.body.required
  */
 
 // forgot password
 
 router.post('/forgotPassword', (req, res, next) => {
-    if (req.body.user_email == null || typeof req.body.user_email == 'undefined') {
+    if (req.body.member_email == null || typeof req.body.member_email == 'undefined') {
         console.log("Parameter not found...")
         res.status(400).json({ error: 1, message: 'Required parameter is missing' });
     }
@@ -126,8 +126,8 @@ router.post('/forgotPassword', (req, res, next) => {
             }
             else {
                 let verification_key = verficationKey();
-                tempConn.query('update user_master set verification_key = ? where user_email = ?;', [verification_key, req.body.user_email], function (error, rows, field) {
-                    tempConn.query('select user_id, user_email from user_master where user_email = ?;', [req.body.user_email], (err, result) => {
+                tempConn.query('update member_master set verification_key = ? where member_email = ?;', [verification_key, req.body.member_email], function (error, rows, field) {
+                    tempConn.query('select member_id, member_email from member_master where member_email = ?;', [req.body.member_email], (err, result) => {
                         tempConn.release();
                         if (err) {
                             console.log("email not found....")
@@ -135,10 +135,10 @@ router.post('/forgotPassword', (req, res, next) => {
                             res.status(401).json(response);
                         }
                         else {
-                            let link = `${config.baseUrl}\\auth\\reset_password\\${req.body.user_email}\\${verification_key}`;
+                            let link = `${config.baseUrl}\\auth\\reset_password\\${req.body.member_email}\\${verification_key}`;
                             sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                             const msg = {
-                                to: req.body.user_email,
+                                to: req.body.member_email,
                                 from: 'test2@gmail.com',
                                 subject: 'Reset password Trello',
                                 text: 'Please reset your password by clicking on the given link ' + link
@@ -157,21 +157,21 @@ router.post('/forgotPassword', (req, res, next) => {
 
 /**
  * @typedef resetPassword
- * @property {string} user_email.required
+ * @property {string} member_email.required
  * @property {string} verification_key.required
  * @property {string} password.required
  */
 
 /**
  * @route put /auth/resetPassword
- * @group Users
+ * @group Members
  * @param {resetPassword.model} resetPassword.body.required
  */
 
 // resetPassword
 router.put('/resetPassword', (req, res, next) => {
     if (req.body.password == null || typeof req.body.password == 'undefined' ||
-        req.body.user_email == null || typeof req.body.user_email == 'undefined') {
+        req.body.member_email == null || typeof req.body.member_email == 'undefined') {
         console.log("parameter is missing")
     }
     else {
@@ -190,8 +190,8 @@ router.put('/resetPassword', (req, res, next) => {
                         })
                     }
                     else {
-                        tempConn.query('UPDATE `user_master` SET `password` = ? WHERE `user_email` = ? AND `verification_key` = ?', 
-                        [hash, req.body.user_email, req.body.verification_key], (error, rows, field) => {
+                        tempConn.query('UPDATE `member_master` SET `password` = ? WHERE `member_email` = ? AND `verification_key` = ?', 
+                        [hash, req.body.member_email, req.body.verification_key], (error, rows, field) => {
                             tempConn.release();
                             if (error) {
                                 console.log('Error : ',error);

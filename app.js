@@ -7,7 +7,7 @@ const cors = require('cors')
 let rateLimit = require('express-rate-limit')
 
 // routes
-const userRoutes = require('./api/routes/users')
+const memberRoutes = require('./api/routes/members')
 const loginRoutes = require('./api/routes/login')
 const boardTypeRoute = require('./api/routes/boardType')
 const boardRoutes = require('./api/routes/boardMaster')
@@ -77,7 +77,7 @@ app.use(cors())
 
 app.use('/uploads', express.static('uploads'));
 app.use('/auth', loginRoutes)
-app.use('/users', userRoutes);
+app.use('/members', memberRoutes);
 app.use('/board-type', boardTypeRoute)
 app.use('/board', boardRoutes)
 app.use('/images', imageOptionsRoutes)

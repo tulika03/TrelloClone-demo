@@ -5,31 +5,23 @@
 module.exports = [
     {
         "method": 'post',
-        "name": '/users',
+        "name": '/add',
         "body": {
-            "user_name": "string",
-            "user_email": "string",
+            "member_fullname": "string",
+            "member_email": "string",
             "contact": "string", 
             "phoneCode": 'string',
-            "user_address": "string",
-            "password": 'string',
-            "city": "string",
-            "state": "string", 
-            "country": "string"
+            "password": 'string'
         }
     },
     {
         "method": 'patch',
-        "name": '/users',
+        "name": '/members/edit',
         "body": {
-            "user_name": "string",
-            "user_email": "string",
+            "member_fullname": "string",
+            "member_email": "string",
             "contact": "string", 
-            "phoneCode": 'string',
-            "user_address": "string",
-            "city": "string",
-            "state": "string", 
-            "country": "string"
+            "phoneCode": 'string'
         }
     },
     {
@@ -48,6 +40,23 @@ module.exports = [
             "board_title": "string",
              "board_desc" : "string",
              "board_type_id": "integer"
+        }
+    },
+    {
+        "method": 'put',
+        "name": '/edit_board_details',
+        "body": {
+             "board_desc" : "string",
+             "board_type_id": "integer",
+             "board_image": "integer"
+        }
+    },
+    {
+        "method": 'post',
+        "name": '/team_member',
+        "body": {
+             "member_email" : "string",
+             "addedBy": "integer"
         }
     }
 ];
