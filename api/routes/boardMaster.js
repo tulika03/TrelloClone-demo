@@ -8,6 +8,8 @@ const APIBody = require("../lib/APIbody")
 const bodyCheck = require("../lib/bodyCheck")
 const multer = require('multer')
 const fs = require('fs')
+var path = require('path')
+var mime = require('mime');
 
 let dir = `${__dirname}/../../uploads/boardImages`;
 const storage = multer.diskStorage({
@@ -28,11 +30,13 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage }).single('board_image')
+
 //add new board
 /**
  * @typedef Board
  * @property {string} board_title.required
  * @property {string} board_desc.required
+ * @property {integer} boardImage
  * @property {integer} board_type_id.required
  */
 
@@ -67,11 +71,17 @@ router.post('/addBoard', checkAuth, (req, res) => {
                         })
                     }
                     else {
-
-                        console.log("row data", rowData)
+                        console.log("row data", req.body)
                         if (rowData.length == 0) {
                             tempConnection.resume();
-                            tempConnection.query("INSERT into board_master (board_title, board_desc, boardImage, createdOn, createdBy, board_type_id) VALUES(?, ?, 3, UNIX_TIMESTAMP()*1000, ?, ?);", [req.body.board_title, req.body.board_desc, req.decoded.member_id, req.body.board_type_id], (err, rows, field) => {
+                            if(req.body.boardImage == 0) 
+                                req.body.boardImage = 3;
+                            if(req.body.board_type_id == 0) {
+                                req.body.board_type_id = 1
+                            }
+                            console.log("row data", req.body)
+                            tempConnection.query("INSERT into board_master (board_title, board_desc, boardImage, createdOn, createdBy, board_type_id) VALUES(?, ?, ?, UNIX_TIMESTAMP()*1000, ?, ?);", 
+                            [req.body.board_title, req.body.board_desc, req.body.boardImage, req.decoded.member_id, req.body.board_type_id], (err, rows, field) => {
                                 tempConnection.release();
 
                                 if (err) {
@@ -115,6 +125,7 @@ router.post('/addBoard', checkAuth, (req, res) => {
 
 /**
  * @route GET /board/boardsList
+ * @security JWT
  * @group Board  
  */
 
@@ -128,7 +139,8 @@ router.get('/boardsList', checkAuth, (req, res, next) => {
             })
         }
         else {
-            tempConnection.query("select bm.board_id, bm.board_title, bm.board_desc, bm.createdOn, bm.board_type_id, btm.board_type_name from board_master bm LEFT JOIN board_type_master btm on bm.board_type_id = btm.board_type_id AND bm.createdBy = ?", [req.decoded.member_id], (err, rows, fields) => {
+            tempConnection.query("select bm.board_id, bm.board_title, bm.board_desc, bm.createdOn, bm.board_type_id, btm.board_type_name from board_master bm LEFT JOIN board_type_master btm on bm.board_type_id = btm.board_type_id AND bm.createdBy = ?", 
+            [req.decoded.member_id], (err, rows, fields) => {
                 if (err) {
                     console.log("error", err)
                     res.status(504).json({
@@ -161,6 +173,7 @@ router.get('/boardsList', checkAuth, (req, res, next) => {
 /**
  * @route GET /board/board_detail/{boardId}
  * @param {number} boardId.path.required
+ * @security JWT
  * @group Board  
  */
 
@@ -202,6 +215,7 @@ router.get("/board_detail/:boardId", checkAuth, (req, res, next) => {
 /**
  * @route DELETE /board/delete_board/{boardId}
  * @param {number} boardId.path.required
+ * @securiyt JWT
  * @group Board  
  */
 
@@ -242,11 +256,11 @@ router.delete('/delete_board/:boardId', checkAuth, (req, res, next) => {
 
 // edit board details
 
-//add new board
 /**
  * @typedef Board
  * @property {string} board_title.required
  * @property {string} board_desc.required
+ * @property {integer} boardImage
  * @property {integer} board_type_id.required
  */
 
@@ -333,4 +347,76 @@ router.put('/edit_board_details/:boardId', checkAuth, (req, res) => {
     }
 })
 
+// view board image 
+/**
+* @route get /board/boardImage/{boardId}
+* @param {number} boardId.path.required
+* @group Board
+*/
+router.get('/boardImage/:boardId', (req, res, next) => {
+    connection.getConnection((error, tempConnection) => {
+        if(error) {
+            console.log("Could not connect to the database.")
+            res.status(504).json({
+                message: 'Unable to process. Please try again.'
+            })
+        }
+        else {
+            tempConnection.query("select image_name, image_id from board_images_options where image_id IN (select boardImage from board_master where board_id = ?);", 
+            [req.params.boardId], (err, rows, field) => {
+                if(err) {
+                    console.log("error", err);
+                    res.status(504).json({
+                      message: 'Unable to process. Please try again.'  
+                    })
+                }
+                else {
+                   const fileUrl = `${dir}/${rows[0].image_name}`
+                  // const fileUrl = 'E:/tulika/internship_task/trelloClone/uploads/boardImages/bg_image1.jpg';
+                    var filename = path.basename(fileUrl);
+                    var mimetype = mime.lookup(fileUrl);
+                    res.setHeader('Content-deposition', 'attachment; filename=' + filename);
+                    res.setHeader('Content-type', mimetype);
+                    var filestream  = fs.createReadStream(fileUrl);
+                    filestream.pipe(res);
+                    //res.download(fileUrl)
+                }
+            });
+        }
+    });
+});
+
+// download File
+
+/**
+* @route get /board/downloadFile/{boardId}
+* @param {number} boardId.path.required
+* @group Board
+*/
+
+router.get('/downloadFile/:boardId', (req, res, next) => {
+    connection.getConnection((err, tempConnection)=> {
+        if(err) {
+            console.log("error", err);
+            res.status(504).json({
+                message: 'Unable to process. Please try again.'
+            })
+        }
+        else {
+            tempConnection.query("select image_name, image_id from board_images_options where image_id IN (select boardImage from board_master where board_id = ?)",
+                [req.params.boardId], (err, rows, field)=>{
+                    if(err) {
+                        console.log("error", err)
+                        res.status(504).json({
+                            message: 'Unable to process. Please try again.'
+                        })
+                    }
+                    else {
+                        const fileUrl = `${dir}/${rows[0].image_name}`;
+                        res.download(fileUrl)
+                    }
+                })
+        }
+    })
+})
 module.exports = router

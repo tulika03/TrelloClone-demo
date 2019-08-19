@@ -12,6 +12,8 @@ const loginRoutes = require('./api/routes/login')
 const boardTypeRoute = require('./api/routes/boardType')
 const boardRoutes = require('./api/routes/boardMaster')
 const imageOptionsRoutes = require('./api/routes/imagesOptions')
+const teamRoutes = require('./api/routes/teamMaster')
+const listRoutes = require('./api/routes/listMaster')
 
 let options = {
     swaggerDefinition: {
@@ -81,6 +83,8 @@ app.use('/members', memberRoutes);
 app.use('/board-type', boardTypeRoute)
 app.use('/board', boardRoutes)
 app.use('/images', imageOptionsRoutes)
+app.use('/team', teamRoutes)
+app.use('/list', listRoutes)
 
 app.use((req, res, next) => {
     console.log("check 404")

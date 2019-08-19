@@ -58,5 +58,22 @@ module.exports = [
              "member_email" : "string",
              "addedBy": "integer"
         }
+    },
+    {
+        "method": 'post',
+        "name": '/addTeam',
+        "body": {
+            "team_name": "string",
+            "team_desc": "string",
+            "team_mode_id": "integer"
+        }
+    },
+    {
+        "method": 'post',
+        "name": '/addList',
+        "body": {
+            "list_name": "string",
+            "list_board_id": "string"
+        }
     }
 ];
