@@ -39,7 +39,8 @@ router.post('/login', (req, res) => {
                 console.log("Connection could not be establed with the database.")
             }
             else {
-                tempConnection.query('select member_id, member_email, password from member_master where member_email = ?',
+                console.log("member email",req.body.member_email)
+                tempConnection.query('select member_id, member_email, password from member_master where member_email=?',
                     [req.body.member_email, ], (err, rows, field) => {
                         tempConnection.release()
                         if (err) {
@@ -49,7 +50,7 @@ router.post('/login', (req, res) => {
                         }
 
                         else {
-                            console.log("rows.length", rows.length)
+                            console.log("rows.length", rows.length, rows)
                             if(rows.length == 1) {
                                 bcrypt.compare(req.body.password, rows[0].password, (err, result) => {
                                     if (err) {

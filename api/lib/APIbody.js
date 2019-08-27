@@ -69,11 +69,19 @@ module.exports = [
         }
     },
     {
+        "method": 'put',
+        "name": '/editTeam',
+        "body": {
+            "team_name": "string",
+            "team_desc": "string"
+        }
+    },
+    {
         "method": 'post',
         "name": '/addList',
         "body": {
             "list_name": "string",
             "list_board_id": "string"
         }
-    }
+    },
 ];

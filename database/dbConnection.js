@@ -20,7 +20,8 @@ let config = function () {
             user: 'root', 
             password: '1234',
             database: 'trelloDB',
-            connectionLimit: 100            
+            connectionLimit: 100,
+            multipleStatements: true        
         },
         timeout :20000,
         baseUrl: 'empty'

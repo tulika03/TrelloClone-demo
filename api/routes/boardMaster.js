@@ -38,6 +38,7 @@ const upload = multer({ storage: storage }).single('board_image')
  * @property {string} board_desc.required
  * @property {integer} boardImage
  * @property {integer} board_type_id.required
+ * @property {integer} team_id
  */
 
 /**
@@ -61,8 +62,7 @@ router.post('/addBoard', checkAuth, (req, res) => {
                 })
             }
             else {
-
-                tempConnection.query("Select * from board_master where board_title=? AND createdBy = ? ;", [req.body.board_title, req.decoded.member_id], (error, rowData, fields) => {
+                  tempConnection.query("Select * from board_master where board_title=? AND createdBy = ? ;", [req.body.board_title, req.decoded.member_id], (error, rowData, fields) => {
                     tempConnection.pause()
                     if (error) {
                         console.log(error, "error")
@@ -79,9 +79,12 @@ router.post('/addBoard', checkAuth, (req, res) => {
                             if(req.body.board_type_id == 0) {
                                 req.body.board_type_id = 1
                             }
+                            if(req.body.team_id == 0){
+                                req.body.team_id = null;
+                            }
                             console.log("row data", req.body)
-                            tempConnection.query("INSERT into board_master (board_title, board_desc, boardImage, createdOn, createdBy, board_type_id) VALUES(?, ?, ?, UNIX_TIMESTAMP()*1000, ?, ?);", 
-                            [req.body.board_title, req.body.board_desc, req.body.boardImage, req.decoded.member_id, req.body.board_type_id], (err, rows, field) => {
+                            tempConnection.query("INSERT into board_master (board_title, board_desc, boardImage, createdOn, createdBy, board_type_id, team_id) VALUES(?, ?, ?, UNIX_TIMESTAMP()*1000, ?, ?, ?);", 
+                            [req.body.board_title, req.body.board_desc, req.body.boardImage, req.decoded.member_id, req.body.board_type_id, req.body.team_id], (err, rows, field) => {
                                 tempConnection.release();
 
                                 if (err) {
@@ -262,6 +265,7 @@ router.delete('/delete_board/:boardId', checkAuth, (req, res, next) => {
  * @property {string} board_desc.required
  * @property {integer} boardImage
  * @property {integer} board_type_id.required
+ * @property {integer} team_id
  */
 
 /**
@@ -300,8 +304,8 @@ router.put('/edit_board_details/:boardId', checkAuth, (req, res) => {
                             else {
                                 if (rowData.length == 0) {
                                     tempConnection.resume();
-                                    tempConnection.query("UPDATE board_master set board_title = ?, board_desc = ?, boardImage = ? board_type_id = ?, updatedOn = UNIX_TIMESTAMP()*1000; where board_id = ?",
-                                        [req.body.board_title, req.body.board_desc, req.body.boardImage, req.body.board_type_id, req.params.boardId], (err, rows, field) => {
+                                    tempConnection.query("UPDATE board_master set board_title = ?, board_desc = ?, boardImage = ? board_type_id = ?, updatedOn = UNIX_TIMESTAMP()*1000, team_id = ? where board_id = ?",
+                                        [req.body.board_title, req.body.board_desc, req.body.boardImage, req.body.board_type_id, req.params.boardId, req.body.team_id], (err, rows, field) => {
                                             tempConnection.release();
                                             if (err) {
                                                 console.log("DB error", err.message, err.sqlMessage)
